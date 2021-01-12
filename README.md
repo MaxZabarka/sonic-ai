@@ -2,10 +2,20 @@
 An AI made using [neat-python](https://github.com/CodeReclaimers/neat-python), that can beat the first few levels of Sonic the Hedgehog Classic on the Sega Genesis
 ## Introduction
 This is my Python source code for training a Neuroevolution of Augmenting Topologies (NEAT) artifical intellegence to play Sonic The Hedghehog on Sega Genesis, using the [neat-python](https://github.com/CodeReclaimers/neat-python) library implementation.
-![Alt Text](GreenHillZone.Act1.gif)
+
+<p align="center">
+  <a href="https://youtu.be/E0s2Cp9tJD8"><img src="GreenHillZone.Act1.gif" width="600" />
+  </a>
+</p>
+<p align="center">
+  <a href="https://youtu.be/E0s2Cp9tJD8">Full Video (Click image ^)
+  </a>
+</p>
 
 ## Why it's great:
  * Can be applied to any level without any changes, and high success rate
+ * Uses only pixel data. No in-game variables!
+ * Uses uncommon NEAT approach instead of A3C
  ***
 # How to use my code:
 

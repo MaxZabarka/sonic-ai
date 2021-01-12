@@ -5,32 +5,35 @@ import neat
 import pickle
 
 import argparse
+import warnings
+
+warnings.filterwarnings("ignore")
 
 parser = argparse.ArgumentParser(description='Train AI to play Sonic!')
 parser.add_argument('level', help="Which level to play (GreenHillZone.Act1,MarbleZone.Act2, etc)")
 parser.add_argument("-r", "--render", action="store_true",
                     help="Use to enable rendering as the network trains (decreases training speed a lot)")
+parser.add_argument("-t","--threads", help="Number of threads to use while training. (Greatly improves training speed)",nargs='?', const=1, type=int,default=1)
 
 args = parser.parse_args()
 state = args.level
 render = args.render
+threads = args.threads
+class Worker:
+    def __init__(self,genome,config):
+        self.genome = genome
+        self.config = config
+    def work(self):
+        self.env = retro.make(game='SonicTheHedgehog-Genesis', state=state)
 
-# create env
-env = retro.make(game='SonicTheHedgehog-Genesis', state=state)
-print("Created Env")
-
-def eval_genomes(genomes, config):
-    # this will run for amount of population
-    for genome_id, genome in genomes:
-        ob = env.reset()
+        ob = self.env.reset()
 
         # width of screen, height of screen, amount of color channels
-        inx, iny, inc = env.observation_space.shape
+        inx, iny, inc = self.env.observation_space.shape
 
         inx = inx // 7
         iny = iny // 7
-
-        net = neat.nn.recurrent.RecurrentNetwork.create(genome, config)
+        net = neat.nn.recurrent.RecurrentNetwork.create(self.genome, self.config)
 
         current_max_fitness = 0
         fitness_current = 0
@@ -43,10 +46,10 @@ def eval_genomes(genomes, config):
         while not done:
             global render
             if render:
-                env.render()
+                self.env.render()
             frame += 1
 
-            #Prepare image for input
+            # Prepare image for input
             ob = cv2.resize(ob, (inx, iny))
             ob = cv2.cvtColor(ob, cv2.COLOR_BGR2GRAY)
             ob = np.reshape(ob, (inx, iny))
@@ -54,23 +57,29 @@ def eval_genomes(genomes, config):
 
             # Put input (image) into net and get output (buttons)
             nnOutput = net.activate(img_array)
-
             prev_x_pos = x_pos
 
             # reward is useless
-            ob, rew, done, info = env.step(nnOutput)
+            ob, _, done, info = self.env.step(nnOutput)
             x_pos = info['x']
             x_pos_end = info['screen_x_end']
 
-
             # Every time Sonic goes further to the right he gains fitness
             if x_pos > x_pos_max:
-                fitness_current += x_pos-prev_x_pos
+                difference = x_pos - prev_x_pos
+                fitness_current += difference ** 4
+                # if difference > 5:
+                #     fitness_current += difference*3
+                #     print("Speed bonus: ",difference*3-difference, ">5")
+                # else:
+                #     fitness_current += difference**1.1
+                # print("Speed bonus: ",difference**4-difference)
+
                 x_pos_max = x_pos
 
             # If sonic has beat the game
             if x_pos >= x_pos_end and x_pos > 500:
-                fitness_current += 100000
+                fitness_current += 10000000
                 done = True
 
             # Every time sonic increases his fitness resets
@@ -81,25 +90,36 @@ def eval_genomes(genomes, config):
             else:
                 counter += 1
 
-            # If sonic goes 250 frames without increasing fitness, he dies
-            if done or counter == 250:
+            # If sonic goes 500 frames without increasing fitness, he dies
+            if done or counter == 500:
                 done = True
-                print(f"------\nGenome Id: {genome_id}\nFitness: {fitness_current}\nX Position: {x_pos}/{x_pos_end}")
+                print(
+                    f"------\nFitness: {fitness_current}\nX Position: {x_pos}/{x_pos_end}")
 
-            genome.fitness = fitness_current
+        return fitness_current
 
-config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
-                     neat.DefaultSpeciesSet, neat.DefaultStagnation,
-                     'config-feedforward-sonic')
 
-p = neat.Population(config)
 
-p.add_reporter(neat.StdOutReporter(True))
-stats = neat.StatisticsReporter()
-p.add_reporter(stats)
-p.add_reporter(neat.Checkpointer(generation_interval=1,filename_prefix="/checkpoints/checkpoint-"))
+def eval_genomes(genome, config):
+    worky = Worker(genome, config)
+    return worky.work()
+if __name__ == "__main__":
 
-winner = p.run(eval_genomes)
-print("Winner Winner Chicken Dinner!")
-with open('winner-'+state+'.pkl','wb') as output:
-    pickle.dump(winner,output,1)
+
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                         'config-feedforward-sonic')
+
+    p = neat.Population(config)
+    # p = neat.Checkpointer.restore_checkpoint('C:\\Users\\15879\Documents\sonic-ai\checkpoints\checkpoint-4')
+    p.add_reporter(neat.StdOutReporter(True))
+    stats = neat.StatisticsReporter()
+    p.add_reporter(stats)
+    p.add_reporter(neat.Checkpointer(generation_interval=1,filename_prefix="checkpoints/checkpoint-"))
+
+    pe = neat.ParallelEvaluator(threads,eval_genomes)
+    winner = p.run(pe.evaluate)
+
+    print("Winner Winner Chicken Dinner!")
+    with open('winner-'+state+'.pkl','wb') as output:
+        pickle.dump(winner,output,1)

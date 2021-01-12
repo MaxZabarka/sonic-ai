@@ -1,0 +1,10 @@
+cloudpickle==1.6.0
+future==0.18.2
+gym==0.18.0
+gym-retro==0.8.0
+neat-python==0.92
+numpy==1.19.5
+opencv-python==4.5.1.48
+Pillow==7.2.0
+pyglet==1.5.0
+scipy==1.6.0

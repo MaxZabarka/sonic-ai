@@ -13,9 +13,14 @@ This is my Python source code for training a Neuroevolution of Augmenting Topolo
 </p>
 
 ## Why it's great:
- * Can be applied to any level without any changes, and high success rate
- * Uses only pixel data. No in-game variables!
+ * Can be applied to almost level without any changes, and high success rate
+ * Uses only pixel data. No in-game variables! (Except for Sonic's X position used to calculate reward)
  * Uses uncommon NEAT approach instead of A3C
+ * Multiprocessed
+## Drawbacks
+ * Slow to train, ~2.5 hours per level on RTX 2070
+ * Doesn't understand concept of building up speed to get over ramps, glitches through them instead
+ * Can't beat levels where Sonic has to go to the left
  ***
 # How to use my code:
 

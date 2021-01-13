@@ -24,7 +24,7 @@ class Worker:
         self.genome = genome
         self.config = config
     def work(self):
-        self.env = retro.make(game='SonicTheHedgehog-Genesis', state=state)
+        self.env = retro.make(game='SonicTheHedgehog-Genesis', state=state,record=".")
 
         ob = self.env.reset()
 
@@ -68,17 +68,11 @@ class Worker:
             if x_pos > x_pos_max:
                 difference = x_pos - prev_x_pos
                 fitness_current += difference ** 4
-                # if difference > 5:
-                #     fitness_current += difference*3
-                #     print("Speed bonus: ",difference*3-difference, ">5")
-                # else:
-                #     fitness_current += difference**1.1
-                # print("Speed bonus: ",difference**4-difference)
 
                 x_pos_max = x_pos
 
             # If sonic has beat the game
-            if x_pos >= x_pos_end and x_pos > 500:
+            if (x_pos >= x_pos_end and x_pos > 500) or x_pos > 4000:
                 fitness_current += 10000000
                 done = True
 
@@ -93,8 +87,9 @@ class Worker:
             # If sonic goes 500 frames without increasing fitness, he dies
             if done or counter == 500:
                 done = True
-                print(
-                    f"------\nFitness: {fitness_current}\nX Position: {x_pos}/{x_pos_end}")
+                print(f"------\nFitness: {fitness_current}\nX Position: {x_pos}/{x_pos_end}")
+                with open('winner-' + state + '.pkl', 'wb') as output:
+                    pickle.dump(self.genome, output, 1)
 
         return fitness_current
 
@@ -111,7 +106,7 @@ if __name__ == "__main__":
                          'config-feedforward-sonic')
 
     p = neat.Population(config)
-    # p = neat.Checkpointer.restore_checkpoint('C:\\Users\\15879\Documents\sonic-ai\checkpoints\checkpoint-4')
+    p = neat.Checkpointer.restore_checkpoint('C:\\Users\\15879\Documents\sonic-ai\checkpoints\checkpoint-118')
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)

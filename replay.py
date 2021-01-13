@@ -28,8 +28,13 @@ p.add_reporter(neat.StdOutReporter(True))
 stats = neat.StatisticsReporter()
 p.add_reporter(stats)
 
-with open(args.file, 'rb') as input_file:
-    genome = pickle.load(input_file)
+genome = pickle.load( open( args.file, "rb" ) )
+with open(args.file, "rb") as f:
+    genome = pickle.load(f)
+
+# with open(args.file, 'rb') as input_file:
+#     input_file.seek(0)
+#     genome = pickle.load(input_file)
 
 ob = env.reset()
 

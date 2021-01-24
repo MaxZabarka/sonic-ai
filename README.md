@@ -13,7 +13,7 @@ This is my Python source code for training a Neuroevolution of Augmenting Topolo
 </p>
 
 ## Why it's great:
- * Can be applied to almost level without any changes, and high success rate
+ * Can be applied to almost any level without any changes, and high success rate
  * Uses only pixel data. No in-game variables! (Except for Sonic's X position used to calculate reward)
  * Uses uncommon NEAT approach instead of A3C
  * Multiprocessed

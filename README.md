@@ -19,9 +19,10 @@ This is my Python source code for training a Neuroevolution of Augmenting Topolo
  * Multiprocessed
 ## Drawbacks
  * Slow to train, ~2.5 hours per level on RTX 2070
- * Doesn't understand concept of building up speed to get over ramps, glitches through them instead
  * Can't beat levels where Sonic has to go to the left
  ***
+
+interestingly, it doesn't understand the concept of building up speed to get over ramps, and will instead find a way to glitch through them!
 # How to use my code:
 
 ## Installation
@@ -47,8 +48,8 @@ python replay.py winner-GreenHillZone.Act1.pkl GreenHillZone.Act1
 ```
 python train.py GreenHillZone.Act1 -r
 ```
-Adding the -r flag lets you watch the AI play as it trains.
+Adding the -r flag lets you watch the AI play as it trains. (significantly slower)
 
-Obviously replace GreenHillZone.Act1 with any level of your choice
+Replace GreenHillZone.Act1 with any level of your choice
 ***
 Inspired by https://www.youtube.com/watch?v=8dY3nQRcsac
